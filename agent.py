@@ -1,5 +1,6 @@
 """Shared agentic loop and MCP server management."""
 
+import os
 from abc import ABC, abstractmethod
 from contextlib import AsyncExitStack
 from dataclasses import dataclass
@@ -18,6 +19,12 @@ MCP_SERVERS: list[StdioServerParameters] = [
         command="python",
         args=["calculator_mcp_server.py"],
     ),
+
+    StdioServerParameters(
+        command="python",
+        args=["coder_mcp_server.py"],
+    )
+
 ]
 
 
@@ -39,7 +46,7 @@ class Backend(ABC):
 
     @abstractmethod
     async def chat(
-        self, messages: list, tools: object
+            self, messages: list, tools: object
     ) -> tuple[list, list[ToolCall], str | None]:
         """
         Call the LLM with the current message history.
@@ -49,16 +56,16 @@ class Backend(ABC):
 
     @abstractmethod
     def append_tool_results(
-        self, messages: list, results: list[tuple[ToolCall, str]]
+            self, messages: list, results: list[tuple[ToolCall, str]]
     ) -> list:
         """Append tool call results to the message history."""
 
 
 async def run_turn(
-    backend: Backend,
-    tool_to_session: dict[str, ClientSession],
-    tools: object,
-    prompt: str,
+        backend: Backend,
+        tool_to_session: dict[str, ClientSession],
+        tools: object,
+        prompt: str,
 ) -> str:
     messages = backend.user_message(prompt)
 
@@ -80,7 +87,7 @@ async def run_turn(
 
 
 async def init_servers(
-    stack: AsyncExitStack,
+        stack: AsyncExitStack,
 ) -> tuple[list, dict[str, ClientSession]]:
     """Spawn all MCP_SERVERS and return (raw_mcp_tools, tool_name→session)."""
     tool_to_session: dict[str, ClientSession] = {}
